@@ -8,6 +8,20 @@ function App() {
   const [history, setHistory] = useState([])
   const [availableItems, setAvailableItems] = useState(['capital', 'region', 'language', 'currency'])
 
+  const getNewCountry = async () => {
+    const newCountry = await fetchRandomCountry()
+    setCountry(newCountry)
+    setAvailableItems(['capital', 'region', 'language', 'currency'])
+
+    setHistory((prev) => [
+      ...prev,
+      {
+        name: newCountry.name.common,
+        flag: newCountry.flags.png
+      }
+    ])
+  }
+
   const fetchRandomCountry = async () => {
     try {
       const response = await fetch('https://restcountries.com/v3.1/all')
@@ -21,23 +35,8 @@ function App() {
     }
   }
 
-  const getNewCountry = async () => {
-    const newCountry = await fetchRandomCountry()
-    setCountry(newCountry)
-    setDroppedItems([])
-    setAvailableItems(['capital', 'region', 'language', 'currency'])
-
-    setHistory((prev) => [
-      ...prev,
-      {
-        name: newCountry.name.common,
-        flag: newCountry.flags.png
-      }
-    ])
-  }
-
   useEffect(() => {
-    getNewCountry()
+    // Initial state is null, so no country is displayed initially
   }, [])
 
   const handleDragStart = (e, item) => {
@@ -60,7 +59,7 @@ function App() {
         currency: Object.values(country.currencies).map(c => c.name).join(', ') ?? 'N/A'
       }[droppedItem]
   
-      setDroppedItems((prev) => [...prev, { type: droppedItem, value }])
+      setDroppedItems((prev) => [...prev, { type: droppedItem, value, label: droppedItem.charAt(0).toUpperCase() + droppedItem.slice(1) }])
       
       setAvailableItems((prev) => prev.filter(item => item !== droppedItem))
     }
@@ -112,19 +111,19 @@ function App() {
                 )
               })}
             </div>
-
-            <br />
-            <button onClick={getNewCountry}>Discover Another</button>
           </div>
         ) : (
-          <p>Loading...</p>
+          <p>No country discovered yet. Click Discover to start!</p>
         )}
+          <button onClick={getNewCountry}>Discover</button>
         </div>
 
         <div className='drop-zone-column' onDragOver={handleDragOver} onDrop={handleDrop}>
           {droppedItems.length > 0 ? (
             droppedItems.map((item, index) => (
-              <p key={index}>✅ {item.type.charAt(0).toUpperCase() + item.type.slice(1)}: {item.value}</p>
+              <div key={index} className='drag-button'>
+                {item.label}: {item.value}
+              </div>
             ))
           ) : (
             <p>Drop Here</p>
