@@ -50,19 +50,20 @@ function App() {
   const handleDrop = (e) => {
     e.preventDefault()
     const droppedItem = e.dataTransfer.getData('text/plain')
-    
-    if (!droppedItems.some((item) => item.type === droppedItem)) {
-      const value = {
-        capital: country.capital?.[0] ?? 'N/A',
-        region: country.region ?? 'N/A',
-        language: Object.values(country.languages).join(', ') ?? 'N/A',
-        currency: Object.values(country.currencies).map(c => c.name).join(', ') ?? 'N/A'
-      }[droppedItem]
-  
-      setDroppedItems((prev) => [...prev, { type: droppedItem, value, label: droppedItem.charAt(0).toUpperCase() + droppedItem.slice(1) }])
-      
-      setAvailableItems((prev) => prev.filter(item => item !== droppedItem))
-    }
+
+    const value = {
+      capital: country.capital?.[0] ?? 'N/A',
+      region: country.region ?? 'N/A',
+      language: country.languages ? Object.values(country.languages)[0] : 'N/A',
+      currency: country.currencies ? Object.values(country.currencies)[0].name : 'N/A'
+    }[droppedItem]
+
+    setDroppedItems((prev) => [...prev, value])
+    setAvailableItems((prev) => prev.filter(item => item !== droppedItem))
+  }
+
+  const handleRemoveItem = (value) => {
+    setDroppedItems((prev) => prev.filter((item) => item !== value))
   }
 
   return (
@@ -93,10 +94,10 @@ function App() {
             <div className='draggable-buttons'>
               {availableItems.map((item) => {
                 const details = {
-                  'capital': country.capital?.[0],
-                  'region': country.region,
-                  'language': Object.values(country.languages ?? {}).join(', '),
-                  'currency': Object.values(country.currencies ?? {}).map((currency) => currency.name).join(', ')
+                  'capital': country.capital?.[0] ?? 'N/A',
+                  'region': country.region ?? 'N/A',
+                  'language': country.languages ? Object.values(country.languages)[0] : 'N/A',
+                  'currency': country.currencies ? Object.values(country.currencies)[0].name : 'N/A'
                 }
                 
                 return (
@@ -106,7 +107,7 @@ function App() {
                     onDragStart={(e) => handleDragStart(e, item)} 
                     className='drag-button'
                   >
-                    {item.charAt(0).toUpperCase() + item.slice(1)}: {details[item]}
+                    {details[item]}
                   </button>
                 )
               })}
@@ -119,17 +120,15 @@ function App() {
         </div>
 
         <div className='drop-zone-column' onDragOver={handleDragOver} onDrop={handleDrop}>
-          {droppedItems.length > 0 ? (
-            droppedItems.map((item, index) => (
-              <div key={index} className='drag-button'>
-                {item.label}: {item.value}
+          <h3>Drop Here<FaTrash className='trash-can' /></h3>
+          {droppedItems.length > 0 ? 
+            droppedItems.map((value, index) => (
+              <div key={index} className='drag-button' onClick={() => handleRemoveItem(value)}>
+                {value}
               </div>
             ))
-          ) : (
-            <p>Drop Here</p>
-          )}
-
-          <FaTrash className='trash-can' />
+            : <p>Drag and drop items here</p>
+          }
         </div>
       </div>
     </>
