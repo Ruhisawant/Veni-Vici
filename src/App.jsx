@@ -7,37 +7,63 @@ function App() {
   const [droppedItems, setDroppedItems] = useState([])
   const [history, setHistory] = useState([])
   const [availableItems, setAvailableItems] = useState(['capital', 'region', 'language', 'currency'])
+  const [error, setError] = useState(null)
 
   const getNewCountry = async () => {
-    const newCountry = await fetchRandomCountry()
-    setCountry(newCountry)
-    setAvailableItems(['capital', 'region', 'language', 'currency'])
-
-    setHistory((prev) => [
-      ...prev,
-      {
-        name: newCountry.name.common,
-        flag: newCountry.flags.png
-      }
-    ])
-  }
-
-  const fetchRandomCountry = async () => {
     try {
-      const response = await fetch('https://restcountries.com/v3.1/all')
-      if (!response.ok) throw new Error('Failed to fetch countries')
+      const newCountry = await fetchRandomCountry()
+      
+      if (newCountry && newCountry.name && newCountry.flags) {
+        setCountry(newCountry)
+        setAvailableItems(['capital', 'region', 'language', 'currency'])
 
-      const data = await response.json()
-      return data[Math.floor(Math.random() * data.length)]
-    } catch (error) {
-      console.error(error)
-      return null
+        setHistory((prev) => [
+          ...prev,
+          {
+            name: newCountry.name.common || 'Unknown Country',
+            flag: newCountry.flags.png || ''
+          }
+        ])
+        setError(null)
+      }
+    } catch (err) {
+      setCountry(null)
+      setError(err.message)
     }
   }
 
-  useEffect(() => {
-    // Initial state is null, so no country is displayed initially
-  }, [])
+  const fetchRandomCountry = async () => {
+    const response = await fetch('https://restcountries.com/v3.1/all');
+    if (!response.ok) throw new Error('Failed to fetch countries');
+
+    const data = await response.json();
+    const filteredData = data.filter((country) => {
+      const hasValidCountryProperties =
+        country.name?.common &&
+        country.flags?.png &&
+        country.capital &&
+        country.region && 
+        country.languages && 
+        country.currencies;
+        
+      if (!hasValidCountryProperties) return false;
+    
+      return !droppedItems.some((bannedItem) => {
+        return (
+          country.capital?.[0] === bannedItem ||
+          country.region === bannedItem ||
+          Object.values(country.languages).includes(bannedItem) ||
+          Object.values(country.currencies).some(currency => currency.name === bannedItem)
+        );
+      });
+    });
+
+    if (filteredData.length === 0) {
+      throw new Error(`No countries left to discover. Remove some items from the ban zone to continue!`)
+    }
+
+    return filteredData[Math.floor(Math.random() * filteredData.length)];
+  };
 
   const handleDragStart = (e, item) => {
     e.dataTransfer.setData('text/plain', item)
@@ -50,16 +76,20 @@ function App() {
   const handleDrop = (e) => {
     e.preventDefault()
     const droppedItem = e.dataTransfer.getData('text/plain')
-
+  
     const value = {
-      capital: country.capital?.[0] ?? 'N/A',
-      region: country.region ?? 'N/A',
-      language: country.languages ? Object.values(country.languages)[0] : 'N/A',
-      currency: country.currencies ? Object.values(country.currencies)[0].name : 'N/A'
+      capital: country?.capital?.[0] ?? 'N/A',
+      region: country?.region ?? 'N/A',
+      language: country?.languages ? Object.values(country.languages)[0] : 'N/A',
+      currency: country?.currencies ? Object.values(country.currencies)[0].name : 'N/A'
     }[droppedItem]
-
-    setDroppedItems((prev) => [...prev, value])
-    setAvailableItems((prev) => prev.filter(item => item !== droppedItem))
+    
+    setDroppedItems((prev) => {
+      const updated = [...prev, value];
+      return updated;
+    });
+  
+    setAvailableItems((prev) => prev.filter(item => item !== droppedItem));
   }
 
   const handleRemoveItem = (value) => {
@@ -75,7 +105,12 @@ function App() {
           {history.length > 0 ? (
             history.map((item, index) => (
               <div key={index} className='history-item'>
-                <img src={item.flag} alt={item.name} width={30} />
+                <img 
+                  src={item.flag} 
+                  alt={item.name} 
+                  width={30} 
+                  onError={(e) => e.target.style.display = 'none'}
+                />
                 <p>{item.name}</p>
               </div>
             ))
@@ -84,38 +119,43 @@ function App() {
           )}
         </div>
         
-        <div className='country-info-column'>
-        {country ? (
-          <div>
-            <h2>{country.name.common}</h2>
-            <img className='flag' src={country.flags.png} alt={country.name.common} width={200} />
-            <br />
+        <div className='country-info-column'>          
+          {country && country.flags && country.flags.png ? (
+            <div>
+              <h2>{country.name.common}</h2>
+              <img 
+                className='flag' 
+                src={country.flags.png} 
+                alt={country.name.common} 
+                width={200}
+                onError={(e) => e.target.style.display = 'none'}
+              />
+              <div className='draggable-buttons'>
+                {availableItems.map((item) => {
+                  const details = {
+                    'capital': country?.capital?.[0] ?? 'N/A',
+                    'region': country?.region ?? 'N/A',
+                    'language': country?.languages ? Object.values(country.languages)[0] : 'N/A',
+                    'currency': country?.currencies ? Object.values(country.currencies)[0].name : 'N/A'
+                  }
 
-            <div className='draggable-buttons'>
-              {availableItems.map((item) => {
-                const details = {
-                  'capital': country.capital?.[0] ?? 'N/A',
-                  'region': country.region ?? 'N/A',
-                  'language': country.languages ? Object.values(country.languages)[0] : 'N/A',
-                  'currency': country.currencies ? Object.values(country.currencies)[0].name : 'N/A'
-                }
-                
-                return (
-                  <button 
-                    key={item} 
-                    draggable 
-                    onDragStart={(e) => handleDragStart(e, item)} 
-                    className='drag-button'
-                  >
-                    {details[item]}
-                  </button>
-                )
-              })}
+                  return (
+                    <button 
+                      key={item} 
+                      draggable 
+                      onDragStart={(e) => handleDragStart(e, item)} 
+                      className='drag-button'
+                    >
+                      {details[item]}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        ) : (
-          <p>No country discovered yet. Click Discover to start!</p>
-        )}
+          ) : (
+            <p>{error || 'No country discovered yet. Click Discover to start!'}</p>
+          )}
+
           <button onClick={getNewCountry}>Discover</button>
         </div>
 
