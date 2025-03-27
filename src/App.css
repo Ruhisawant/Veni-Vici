@@ -16,65 +16,52 @@ h1 {
   font-size: 2.5rem;
 }
 
+h3 {
+  text-align: center;
+  width: 100%;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
 /* App Layout */
 .App {
   display: flex;
   gap: 35px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Columns */
+.history-column,
+.country-info-column,
+.ban-column {
+  border: 1px solid #ddd;
+  height: 750px;
+  border-radius: 5px;
+  text-align: center;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .history-column,
-.drop-zone-column {
+.ban-column {
   width: 300px;
-  border: 1px solid #ddd;
-  padding: 15px;
-  text-align: center;
-  height: 750px;
 }
 
 .country-info-column {
   width: 850px;
-  border: 1px solid #ddd;
-  padding: 15px;
-  text-align: center;
-  height: 750px;
 }
 
-.drop-zone-column {
-  border: 1px solid #ddd;
+.ban-column {
   min-height: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-}
-
-
-/* Buttons */
-button {
-  background: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 15px;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
   transition: background 0.3s;
 }
 
-button:hover {
-  background: #0056b3;
-}
-
-.drag-button {
-  margin: 5px;
-  padding: 10px 12px;
-  background: #28a745;
-  border-radius: 5px;
-  cursor: grab;
-}
-
-.drag-button:hover {
-  background: #218838;
+.ban-column:hover {
+  background: rgba(0, 123, 255, 0.1);
 }
 
 /* History Items */
@@ -85,11 +72,65 @@ button:hover {
   padding: 10px;
   border-bottom: 1px solid #ddd;
   font-size: 20px;
+  transition: background 0.3s;
+}
+
+.history-item:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .history-item img {
   border-radius: 5px;
   width: 80px;
   height: 50px;
+  object-fit: cover;
 }
 
+/* Country Info Items */
+.flag {
+  width: 60%;
+  height: 300px;
+  border-radius: 5px;
+  object-fit: cover;
+  margin-bottom: 40px;
+}
+
+.info-container {
+  gap: 10px;
+  padding-bottom: 25px;
+}
+
+.info-btn {
+  margin: 5px;
+  font-size: 1.2rem;
+  padding: 10px 12px;
+  background: #28a745;
+  border-radius: 5px;
+  cursor: grab;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.info-btn:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+.discover-btn {
+  background: #007bff;
+  border: none;
+  padding: 12px 18px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.discover-btn:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Ban Items */
+.trash-can {
+  height: 30px;
+}

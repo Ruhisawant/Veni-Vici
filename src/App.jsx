@@ -9,6 +9,7 @@ function App() {
   const [availableItems, setAvailableItems] = useState(['capital', 'region', 'language', 'currency'])
   const [error, setError] = useState(null)
 
+  // Fetch a new random country and update state accordingly
   const getNewCountry = async () => {
     try {
       const newCountry = await fetchRandomCountry()
@@ -32,11 +33,12 @@ function App() {
     }
   }
 
+  // Fetch a random country from the API, filtering out banned items
   const fetchRandomCountry = async () => {
-    const response = await fetch('https://restcountries.com/v3.1/all');
-    if (!response.ok) throw new Error('Failed to fetch countries');
+    const response = await fetch('https://restcountries.com/v3.1/all')
+    if (!response.ok) throw new Error('Failed to fetch countries')
 
-    const data = await response.json();
+    const data = await response.json()
     const filteredData = data.filter((country) => {
       const hasValidCountryProperties =
         country.name?.common &&
@@ -44,9 +46,9 @@ function App() {
         country.capital &&
         country.region && 
         country.languages && 
-        country.currencies;
+        country.currencies
         
-      if (!hasValidCountryProperties) return false;
+      if (!hasValidCountryProperties) return false
     
       return !droppedItems.some((bannedItem) => {
         return (
@@ -54,25 +56,27 @@ function App() {
           country.region === bannedItem ||
           Object.values(country.languages).includes(bannedItem) ||
           Object.values(country.currencies).some(currency => currency.name === bannedItem)
-        );
-      });
-    });
+        )
+      })
+    })
 
     if (filteredData.length === 0) {
-      throw new Error(`No countries left to discover. Remove some items from the ban zone to continue!`)
+      throw new Error('No countries left to discover. Remove some items from the ban zone to continue!')
     }
+    return filteredData[Math.floor(Math.random() * filteredData.length)]
+  }
 
-    return filteredData[Math.floor(Math.random() * filteredData.length)];
-  };
-
+  // Handle drag start event for draggable items
   const handleDragStart = (e, item) => {
     e.dataTransfer.setData('text/plain', item)
   }
 
+  // Allow drag-over event to enable dropping
   const handleDragOver = (e) => {
     e.preventDefault()
   }
 
+  // Handle drop event and add dropped item to the list
   const handleDrop = (e) => {
     e.preventDefault()
     const droppedItem = e.dataTransfer.getData('text/plain')
@@ -85,13 +89,14 @@ function App() {
     }[droppedItem]
     
     setDroppedItems((prev) => {
-      const updated = [...prev, value];
-      return updated;
-    });
-  
-    setAvailableItems((prev) => prev.filter(item => item !== droppedItem));
+      const updated = [...prev, value]
+      return updated
+    })
+
+    setAvailableItems((prev) => prev.filter(item => item !== droppedItem))
   }
 
+  // Remove an item from the drop zone
   const handleRemoveItem = (value) => {
     setDroppedItems((prev) => prev.filter((item) => item !== value))
   }
@@ -100,17 +105,13 @@ function App() {
     <>
       <h1>Discover a New Country!</h1>
       <div className='App'>
+        {/* History Column */}
         <div className='history-column'>
           <h3>History</h3>
           {history.length > 0 ? (
             history.map((item, index) => (
               <div key={index} className='history-item'>
-                <img 
-                  src={item.flag} 
-                  alt={item.name} 
-                  width={30} 
-                  onError={(e) => e.target.style.display = 'none'}
-                />
+                <img src={item.flag} alt={item.name} onError={(e) => e.target.style.display = 'none'} />
                 <p>{item.name}</p>
               </div>
             ))
@@ -119,18 +120,13 @@ function App() {
           )}
         </div>
         
+        {/* Country Info Column */}
         <div className='country-info-column'>          
           {country && country.flags && country.flags.png ? (
             <div>
-              <h2>{country.name.common}</h2>
-              <img 
-                className='flag' 
-                src={country.flags.png} 
-                alt={country.name.common} 
-                width={200}
-                onError={(e) => e.target.style.display = 'none'}
-              />
-              <div className='draggable-buttons'>
+              <h1>{country.name.common}</h1>
+              <img className='flag' src={country.flags.png} alt={country.name.common} onError={(e) => e.target.style.display = 'none'} />
+              <div className='info-container'>
                 {availableItems.map((item) => {
                   const details = {
                     'capital': country?.capital?.[0] ?? 'N/A',
@@ -144,7 +140,7 @@ function App() {
                       key={item} 
                       draggable 
                       onDragStart={(e) => handleDragStart(e, item)} 
-                      className='drag-button'
+                      className='info-btn'
                     >
                       {details[item]}
                     </button>
@@ -156,18 +152,19 @@ function App() {
             <p>{error || 'No country discovered yet. Click Discover to start!'}</p>
           )}
 
-          <button onClick={getNewCountry}>Discover</button>
+          <button className='discover-btn' onClick={getNewCountry}>Discover</button>
         </div>
 
-        <div className='drop-zone-column' onDragOver={handleDragOver} onDrop={handleDrop}>
-          <h3>Drop Here<FaTrash className='trash-can' /></h3>
+        {/* Ban Column */}
+        <div className='ban-column' onDragOver={handleDragOver} onDrop={handleDrop}>
+          <h3>Ban List <FaTrash className='trash-can' /></h3>
           {droppedItems.length > 0 ? 
             droppedItems.map((value, index) => (
-              <div key={index} className='drag-button' onClick={() => handleRemoveItem(value)}>
+              <div key={index} className='info-btn' onClick={() => handleRemoveItem(value)}>
                 {value}
               </div>
             ))
-            : <p>Drag and drop items here</p>
+            : <p>Drag and drop items here to ban!</p>
           }
         </div>
       </div>
