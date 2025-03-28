@@ -31,7 +31,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='.assets/VideoWalkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='src/assets/VideoWalkthrough.gif' title='Video Walkthrough' width='800px' alt='Video Walkthrough' />
 GIF created with ... [Adobe Express](https://www.adobe.com/express/feature/video/convert/mov-to-gif)
 
 ## Notes
