@@ -4,7 +4,7 @@ import './App.css'
 
 function App() {
   const [country, setCountry] = useState(null)
-  const [droppedItems, setDroppedItems] = useState([])
+  const [bannedItems, setBannedItems] = useState([])
   const [history, setHistory] = useState([])
   const [availableItems, setAvailableItems] = useState(['capital', 'region', 'language', 'currency'])
   const [error, setError] = useState(null)
@@ -50,7 +50,7 @@ function App() {
         
       if (!hasValidCountryProperties) return false
     
-      return !droppedItems.some((bannedItem) => {
+      return !bannedItems.some((bannedItem) => {
         return (
           country.capital?.[0] === bannedItem ||
           country.region === bannedItem ||
@@ -79,26 +79,27 @@ function App() {
   // Handle drop event and add dropped item to the list
   const handleDrop = (e) => {
     e.preventDefault()
-    const droppedItem = e.dataTransfer.getData('text/plain')
+    const bannedItem = e.dataTransfer.getData('text/plain')
   
     const value = {
       capital: country?.capital?.[0] ?? 'N/A',
       region: country?.region ?? 'N/A',
       language: country?.languages ? Object.values(country.languages)[0] : 'N/A',
       currency: country?.currencies ? Object.values(country.currencies)[0].name : 'N/A'
-    }[droppedItem]
+    }[bannedItem]
     
-    setDroppedItems((prev) => {
-      const updated = [...prev, value]
-      return updated
-    })
-
-    setAvailableItems((prev) => prev.filter(item => item !== droppedItem))
+    setBannedItems((prev) => prev.includes(value) ? prev : [...prev, value]);
+    setAvailableItems((prev) => prev.filter(item => item !== bannedItem))
   }
 
-  // Remove an item from the drop zone
+  // Remove an item from the ban list
   const handleRemoveItem = (value) => {
-    setDroppedItems((prev) => prev.filter((item) => item !== value))
+    setBannedItems((prev) => prev.filter((item) => item !== value))
+  }
+
+  // Remove all items from the ban list
+  const clearBanList = () => {
+    setBannedItems([]);
   }
 
   return (
@@ -149,7 +150,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <p>{error || 'Enter a country name or click Discover to reveal details. Drag attributes to the ban list to filter them out.'}</p>
+            <p className='info-message'>{error || 'Click Discover to reveal a new country. Drag attributes to the ban list to filter them out.'}</p>
           )}
 
           <button className='discover-btn' onClick={getNewCountry}>Discover</button>
@@ -157,15 +158,16 @@ function App() {
 
         {/* Ban Column */}
         <div className='ban-column' onDragOver={handleDragOver} onDrop={handleDrop}>
-          <h3>Ban List <FaTrash className='trash-can' /></h3>
-          {droppedItems.length > 0 ? 
-            droppedItems.map((value, index) => (
+          <h3>Ban List </h3>
+          {bannedItems.length > 0 ? 
+            bannedItems.map((value, index) => (
               <div key={index} className='info-btn' onClick={() => handleRemoveItem(value)}>
                 {value}
               </div>
             ))
             : <p>Drag and drop items here to ban!</p>
           }
+          <FaTrash className='trash-can' onClick={clearBanList} />
         </div>
       </div>
     </>

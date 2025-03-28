@@ -29,6 +29,7 @@ h3 {
   gap: 35px;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: flex-start;
 }
 
 /* Columns */
@@ -36,7 +37,6 @@ h3 {
 .country-info-column,
 .ban-column {
   border: 1px solid #ddd;
-  height: 750px;
   border-radius: 5px;
   text-align: center;
   padding: 10px;
@@ -46,17 +46,23 @@ h3 {
 .history-column,
 .ban-column {
   width: 300px;
+  min-height: 750px;
 }
 
+.history-column {
+  flex-grow: 1;
+}
 .country-info-column {
+  height: 750px;
   width: 850px;
 }
 
 .ban-column {
-  min-height: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  flex-grow: 1;
   transition: background 0.3s;
 }
 
@@ -87,6 +93,11 @@ h3 {
 }
 
 /* Country Info Items */
+.info-message {
+  font-size: 40px;
+  padding: 20px;
+}
+
 .flag {
   width: 60%;
   height: 300px;
@@ -132,5 +143,15 @@ h3 {
 
 /* Ban Items */
 .trash-can {
-  height: 30px;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 35px;
+  color: #ff0000;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.trash-can:hover {
+  transform: scale(1.2);
 }
