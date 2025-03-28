@@ -167,7 +167,7 @@ function App() {
             ))
             : <p>Drag and drop items here to ban!</p>
           }
-          <FaTrash className='trash-can' onClick={clearBanList} />
+          <FaTrash className='trash-can' onClick={clearBanList} aria-label='Clear Ban List' />
         </div>
       </div>
     </>

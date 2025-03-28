@@ -126,6 +126,10 @@ h3 {
   transform: scale(1.05);
 }
 
+.info-btn:active {
+  cursor: grabbing;
+}
+
 .discover-btn {
   background: #007bff;
   border: none;
