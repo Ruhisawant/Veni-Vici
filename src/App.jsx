@@ -149,7 +149,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <p>{error || 'No country discovered yet. Click Discover to start!'}</p>
+            <p>{error || 'Enter a country name or click Discover to reveal details. Drag attributes to the ban list to filter them out.'}</p>
           )}
 
           <button className='discover-btn' onClick={getNewCountry}>Discover</button>
